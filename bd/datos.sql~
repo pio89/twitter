@@ -1,0 +1,9 @@
+-- CARGA DATOS PARA PRUEBAS TWITTER ON LINE --
+-- Partimos de la BBDD vacía --
+
+-- ROLES --
+
+    insert into usuarios (nick, password)
+                      values ('antonio',
+                             'antonio');
+
