@@ -15,7 +15,7 @@ drop table if exists tuit cascade;
 create table tuit (
     id          bigserial    constraint pk_tuit primary key,
     mensaje     varchar(140) not null,
-    fecha       timestamp    not null default CURRENT_DATE,
+    fecha       timestamp    not null default CURRENT_TIMESTAMP,
     id_usuarios bigint       not null constraint fk_usuarios_tuits
                              references usuarios (id)
                              on delete cascade on update cascade

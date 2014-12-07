@@ -98,7 +98,26 @@
     function mostrarTuit($id_usuario)
       {
         global $con;
-        $res = pg_query($con, "select t.id, u.nick, t.mensaje, t.fecha from usuarios u, tuit t where u.id = t.id_usuarios and u.id= $id_usuario");
+        
+        $nfilas = contar_filas('tuit');
+        $fpp = 3;
+        $npags = ceil($nfilas/$fpp);
+        
+        $pag = isset($_GET['pag']) ? trim($_GET['pag']) : 1;
+
+    /*falta cosas*/
+
+  
+
+
+
+
+
+        $res = pg_query($con, "select t.id, u.nick, t.mensaje, 
+          to_char(fecha, 'dd-mm-yyyy\" a las \"HH24:MI:SS') as fecha_formateada from usuarios u, tuit t where u.id = t.id_usuarios and u.id= $id_usuario 
+                          order by t.fecha desc
+                          limit $fpp
+                           offset ($pag-1)*$fpp");
 
      
         if (pg_num_rows($res) > 0)
@@ -123,8 +142,8 @@
    
     
           
-          <p><span style="font-weight:bold;"><?= $fila['nick'] ?></span>&nbsp&nbsp<?= $fila['fecha'] ?></p>
-          <?= $fila['mensaje'] ?> 
+          <p><span style="font-weight:bold;"><?= $fila['nick'] ?></span>&nbsp&nbsp<?= $fila['fecha_formateada'] ?></p>
+          <p><?= $fila['mensaje'] ?></p> 
           <form method="post" action="index.php">
           <input type="hidden" name="id" value="<?= $fila['id'] ?>" />
           <input type="submit" value="Borrar" />
@@ -138,7 +157,9 @@
         
           ?>
            </div>          
-                    
+            <div style="text-align:center; width:100px; background-color: green; line-height: 30px;"><?=menu_paginacion($nfilas, $fpp
+          ,$npags, $pag );?></div>
+         
                  
         <?php
        
@@ -152,12 +173,86 @@
       }
 
 
+
+
+
+
+
+
       function borrar_tuit($id)
       {
           global $con;
            $res = pg_query($con, "delete from tuit where id::text='$id'");
       }
 
+      /************************* PAGINACION **************************************************/
+     function contar_filas($tabla)
+    {
+    global $con;
+
+    $res = pg_query($con, "select count(*) as nfilas from $tabla");
+
+    $fila = pg_fetch_assoc($res);
+
+    pg_close();
+
+    return $fila['nfilas'];
+  }
+
+
+
+
+
+
+     function menu_paginacion($nfilas, $fpp ,$npags, $pag)
+    {
+       /* global $fpp;
+        global $pag;
+        global $npags;*/
+      
+        $siguiente = $pag+1;
+        $anterior = $pag-1;
+
+    if ($pag > 1) { ?>
+      <a href="<?="index.php?pag=$anterior"?>">&lt;</a><?php
+    }
+/*
+    for ($i = 1; $i <= $npags; $i++) {
+      if ($i == $pag) { ?>
+        <?= $i ?><?php
+      } else { ?>
+        <a href="index.php?pag=<?= $i.$url ?>"><?= $i ?></a><?php
+      }
+    }
+*/
+
+
+        for ($i = $pag-1; $i >= $pag-1; $i--)
+        {
+            
+         
+             if($i > 0) { ?>
+                <a href="index.php?pag=<?= $i ?>"><?= $i ?></a><?php
+            } 
+        }
+
+
+
+        for ($i = $pag; $i <= $pag+1; $i++)
+        {
+            
+           if ($i == $pag) { ?>
+                <?= $i ?><?php
+            } else if($npags >= $i) { ?>
+                <a href="index.php?pag=<?= $i ?>"><?= $i ?></a><?php
+            } 
+        }
+
+    if ($pag < $npags) 
+    { ?>
+      <a href="<?="index.php?pag=$siguiente"?>">&gt;</a><?php
+    }
+    }
 
 
 
@@ -167,12 +262,7 @@
 
 
 
-
-
-
-
-
-
+    
 
 
 
@@ -262,8 +352,9 @@
         borrar_tuit($id);
       }
 
-
+       
        mostrarTuit($id_usuario);
+
 
 
 
